@@ -8,10 +8,24 @@ using namespace std;
 
 int main()
 {
-    Champions champion1("villain1", 10, 3, 4, 8);
-    cout << champion1.name << "\n"
-         << champion1.attack << "\n"
-         << champion1.defense << "\n"
-         << champion1.magic << "\n"
-         << champion1.luck << "\n";
+    int N = 20;
+    vector<Champions> champions;
+
+    for (int i = 0; i < 5; i++)
+    {
+        // Création d'un nouveau champion
+        Champions champion("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
+
+        // Ajout du champion au vecteur
+        champions.push_back(champion);
+
+        // Affichage des attributs du champion
+        cout << "Champion " << i << ":" << endl;
+        cout << "Name: " << champions[i].name << endl
+             << "Attack: " << champions[i].attack << endl
+             << "Defense: " << champions[i].defense << endl
+             << "Magic: " << champions[i].magic << endl
+             << "Luck: " << champions[i].luck << endl
+             << endl;
+    }
 }
