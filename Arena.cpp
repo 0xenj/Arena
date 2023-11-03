@@ -6,6 +6,7 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include <memory>
 
 using namespace std;
 
@@ -47,18 +48,18 @@ public:
 class Arena
 {
 public:
-    vector<Champion> champions;
+    vector<unique_ptr<Champion>> champions;
 
-    void addChampion(const Champion &c)
+    void addChampion(unique_ptr<Champion> c)
     {
         if (champions.size() < 4)
         {
-            champions.push_back(c);
-            cout << c.getFormattedNameWithAttributes() << " a rejoint l'arene!" << endl;
+            cout << c->getFormattedNameWithAttributes() << " a rejoint l'arene!" << endl;
+            champions.push_back(move(c));
         }
         else
         {
-            cout << "L'arene est pleine, " << c.getFormattedNameWithAttributes() << " ne peut pas rejoindre!" << endl;
+            cout << "L'arene est pleine, " << c->getFormattedNameWithAttributes() << " ne peut pas rejoindre!" << endl;
         }
     }
 
@@ -77,24 +78,23 @@ public:
             defenderIndex = rand() % champions.size();
         } while (attackerIndex == defenderIndex);
 
-        Champion &attacker = champions[attackerIndex];
-        Champion &defender = champions[defenderIndex];
+        Champion *attacker = champions[attackerIndex].get();
+        Champion *defender = champions[defenderIndex].get();
 
         int attackerWins = 0;
         int defenderWins = 0;
 
-        // Confrontations
-        if (attacker.attack > defender.magic)
+        if (attacker->attack > defender->magic)
             attackerWins++;
-        if (defender.attack > attacker.magic)
+        if (defender->attack > attacker->magic)
             defenderWins++;
-        if (attacker.magic > defender.defense)
+        if (attacker->magic > defender->defense)
             attackerWins++;
-        if (defender.magic > attacker.defense)
+        if (defender->magic > attacker->defense)
             defenderWins++;
-        if (attacker.defense > defender.attack)
+        if (attacker->defense > defender->attack)
             attackerWins++;
-        if (defender.defense > attacker.attack)
+        if (defender->defense > attacker->attack)
             defenderWins++;
 
         Champion *winner = nullptr;
@@ -102,13 +102,13 @@ public:
 
         if (attackerWins > defenderWins)
         {
-            winner = &attacker;
-            loser = &defender;
+            winner = attacker;
+            loser = defender;
         }
         else if (defenderWins > attackerWins)
         {
-            winner = &defender;
-            loser = &attacker;
+            winner = defender;
+            loser = attacker;
         }
 
         if (loser && loser->luck > winner->luck && rand() % 2 == 0)
@@ -130,16 +130,16 @@ public:
                 cout << loser->getFormattedNameWithAttributes() << " est elimine de l'arene!" << endl;
                 winner->addScore(5);
                 champions.erase(remove_if(champions.begin(), champions.end(),
-                                          [loser](const Champion &c)
-                                          { return &c == loser; }),
+                                          [loser](const unique_ptr<Champion> &c)
+                                          { return c.get() == loser; }),
                                 champions.end());
             }
         }
         else
         {
-            cout << "Le combat entre " << attacker.getFormattedNameWithAttributes() << " et " << defender.getFormattedNameWithAttributes() << " se termine par un match nul." << endl;
-            attacker.addScore(2);
-            defender.addScore(2);
+            cout << "Le combat entre " << attacker->getFormattedNameWithAttributes() << " et " << defender->getFormattedNameWithAttributes() << " se termine par un match nul." << endl;
+            attacker->addScore(2);
+            defender->addScore(2);
         }
 
         for (const auto &champion : champions)
