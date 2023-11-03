@@ -11,10 +11,10 @@ class Champion
 {
 public:
     string name;
-    int attack, defense, magic, luck;
+    int attack, defense, magic, luck, lives;
 
     Champion(const string &n, int a, int d, int m, int l)
-        : name(n), attack(a), defense(d), magic(m), luck(l) {}
+        : name(n), attack(a), defense(d), magic(m), luck(l), lives(3) {}
 };
 
 class Arena
@@ -45,7 +45,6 @@ public:
 
         int attackerIndex = rand() % champions.size();
         int defenderIndex;
-
         do
         {
             defenderIndex = rand() % champions.size();
@@ -54,13 +53,73 @@ public:
         Champion &attacker = champions[attackerIndex];
         Champion &defender = champions[defenderIndex];
 
-        // Ici, ajoutez la logique pour déterminer le gagnant et affichez les résultats du combat
-        cout << attacker.name << " attaque " << defender.name << "!" << endl;
+        int attackerWins = 0;
+        int defenderWins = 0;
+
+        // Confrontation 1: Attaque vs Magie
+        if (attacker.attack > defender.magic)
+            attackerWins++;
+        if (defender.attack > attacker.magic)
+            defenderWins++;
+
+        // Confrontation 2: Magie vs Défense
+        if (attacker.magic > defender.defense)
+            attackerWins++;
+        if (defender.magic > attacker.defense)
+            defenderWins++;
+
+        // Confrontation 3: Défense vs Attaque
+        if (attacker.defense > defender.attack)
+            attackerWins++;
+        if (defender.defense > attacker.attack)
+            defenderWins++;
+
+        // Déterminer le gagnant
+        Champion *winner = nullptr;
+        Champion *loser = nullptr;
+
+        if (attackerWins > defenderWins)
+        {
+            winner = &attacker;
+            loser = &defender;
+        }
+        else if (defenderWins > attackerWins)
+        {
+            winner = &defender;
+            loser = &attacker;
+        }
+
+        // Gérer le cas de la chance
+        if (loser && loser->luck > winner->luck)
+        {
+            if (rand() % 2 == 0)
+            { // 50% chance
+                cout << loser->name << " a de la chance et survit avec " << loser->lives << " vies!" << endl;
+                return;
+            }
+        }
+
+        if (winner)
+        {
+            loser->lives--;
+            cout << winner->name << " gagne le combat contre " << loser->name << ". ";
+            cout << loser->name << " a maintenant " << loser->lives << " vies." << endl;
+            if (loser->lives <= 0)
+            {
+                cout << loser->name << " est éliminé de l'arène!" << endl;
+                champions.erase(champions.begin() + (loser - &champions[0])); // Remove the champion who lost all lives
+            }
+        }
+        else
+        {
+            cout << "Le combat entre " << attacker.name << " et " << defender.name << " se termine par un match nul." << endl;
+        }
     }
 };
 
 int main()
 {
+    srand(static_cast<unsigned int>(time(nullptr))); // Initialisation du générateur de nombres aléatoires
     Arena arena;
     int N = 20;
     auto lastChampionTime = chrono::steady_clock::now();
