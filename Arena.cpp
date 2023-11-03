@@ -129,6 +129,7 @@ int main()
     srand(static_cast<unsigned int>(time(nullptr))); // Initialisation du générateur de nombres aléatoires
     Arena arena;
     int N = 20;
+    int i = 0;
     auto lastChampionTime = chrono::steady_clock::now();
     auto lastBattleTime = chrono::steady_clock::now();
 
@@ -138,9 +139,10 @@ int main()
 
         if (chrono::duration_cast<chrono::seconds>(now - lastChampionTime).count() >= 5)
         {
-            Champion newChampion("villain" + to_string(arena.champions.size()), rand() % N, rand() % N, rand() % N, rand() % N);
+            Champion newChampion("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
             arena.addChampion(newChampion);
             lastChampionTime = now;
+            i++;
         }
 
         if (chrono::duration_cast<chrono::seconds>(now - lastBattleTime).count() >= 1)
