@@ -33,6 +33,11 @@ public:
         score += points;
     }
 
+    bool isEliminated() const
+    {
+        return lives <= 0;
+    }
+
     bool hasReachedScoreLimit(int limit) const
     {
         return score >= limit;
@@ -106,33 +111,35 @@ public:
             loser = &attacker;
         }
 
-        // Surviving by luck
         if (loser && loser->luck > winner->luck && rand() % 2 == 0)
         {
             cout << loser->getFormattedNameWithAttributes() << " a de la chance et survit avec " << loser->lives << " vies!" << endl;
-            loser->addScore(5);
+            loser->addScore(2);
             return false;
         }
 
         if (winner)
         {
             loser->lives--;
-            winner->addScore(10);
+            winner->addScore(5);
             cout << winner->getFormattedNameWithAttributes() << " gagne le combat contre " << loser->getFormattedNameWithAttributes() << ". ";
             cout << loser->getFormattedNameWithAttributes() << " a maintenant " << loser->lives << " vies." << endl;
 
-            if (loser->lives <= 0)
+            if (loser->isEliminated())
             {
                 cout << loser->getFormattedNameWithAttributes() << " est elimine de l'arene!" << endl;
                 winner->addScore(5);
-                champions.erase(champions.begin() + (loser - &champions[0]));
+                champions.erase(remove_if(champions.begin(), champions.end(),
+                                          [loser](const Champion &c)
+                                          { return &c == loser; }),
+                                champions.end());
             }
         }
         else
         {
             cout << "Le combat entre " << attacker.getFormattedNameWithAttributes() << " et " << defender.getFormattedNameWithAttributes() << " se termine par un match nul." << endl;
-            attacker.addScore(5);
-            defender.addScore(5);
+            attacker.addScore(2);
+            defender.addScore(2);
         }
 
         for (const auto &champion : champions)
@@ -147,48 +154,42 @@ public:
     }
 };
 
-void simulateCombat()
-{
-    srand(static_cast<unsigned int>(time(nullptr)));
-
-    Arena arena;
-    int N = 20;
-    int i = 0;
-    auto lastChampionTime = chrono::steady_clock::now();
-    auto lastBattleTime = chrono::steady_clock::now();
-    bool scoreLimitReached = false;
-
-    while (!scoreLimitReached)
-    {
-        auto now = chrono::steady_clock::now();
-
-        if (chrono::duration_cast<chrono::seconds>(now - lastChampionTime).count() >= 5)
-        {
-            Champion newChampion("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
-            arena.addChampion(newChampion);
-            lastChampionTime = now;
-            i++;
-        }
-
-        if (chrono::duration_cast<chrono::seconds>(now - lastBattleTime).count() >= 1)
-        {
-            arena.battle();
-            lastBattleTime = now;
-        }
-
-        scoreLimitReached = arena.battle();
-        this_thread::sleep_for(chrono::seconds(1));
-    }
-
-    cout << "The combat has ended. Final Scores:" << endl;
-    for (const auto &champion : arena.champions)
-    {
-        cout << champion.getFormattedNameWithAttributes() << endl;
-    }
-}
-
 int main()
 {
-    simulateCombat();
-    return 0;
+    {
+        srand(static_cast<unsigned int>(time(nullptr)));
+
+        Arena arena;
+        int N = 20;
+        int i = 0;
+        bool combatOver = false;
+        auto start = chrono::steady_clock::now();
+        int lastChampionAddedAtSecond = -5;
+
+        while (!combatOver)
+        {
+            auto now = chrono::steady_clock::now();
+            auto elapsed = chrono::duration_cast<chrono::seconds>(now - start).count();
+
+            if (elapsed - lastChampionAddedAtSecond >= 5 && arena.champions.size() < 4)
+            {
+                Champion newChampion("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
+                arena.addChampion(newChampion);
+                lastChampionAddedAtSecond = static_cast<int>(elapsed);
+                i++;
+            }
+
+            combatOver = arena.battle();
+            this_thread::sleep_for(chrono::seconds(1));
+        }
+
+        cout << "Les combats sont finis!" << endl;
+
+        auto winner = *max_element(arena.champions.begin(), arena.champions.end(), [](const Champion &a, const Champion &b)
+                                   { return a.score < b.score; });
+
+        cout << "The gagnant est : " << winner.getFormattedNameWithAttributes() << endl;
+
+        return 0;
+    }
 }

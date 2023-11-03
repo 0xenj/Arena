@@ -6,6 +6,7 @@
     "ostream": "cpp",
     "system_error": "cpp",
     "xlocale": "cpp",
-    "chrono": "cpp"
+    "chrono": "cpp",
+    "vector": "cpp"
   }
 }
