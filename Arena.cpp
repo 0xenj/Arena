@@ -15,6 +15,15 @@ public:
 
     Champion(const string &n, int a, int d, int m, int l)
         : name(n), attack(a), defense(d), magic(m), luck(l), lives(3) {}
+
+    string getFormattedNameWithAttributes() const
+    {
+        return name + " [" + to_string(attack) +
+               "," + to_string(defense) +
+               "," + to_string(magic) +
+               "," + to_string(luck) +
+               "](" + to_string(lives) + ")";
+    }
 };
 
 class Arena
@@ -27,11 +36,11 @@ public:
         if (champions.size() < 4)
         {
             champions.push_back(c);
-            cout << c.name << " a rejoint l'arene!" << endl;
+            cout << c.getFormattedNameWithAttributes() << " a rejoint l'arene!" << endl;
         }
         else
         {
-            cout << "L'arene est pleine, " << c.name << " ne peut pas rejoindre!" << endl;
+            cout << "L'arene est pleine, " << c.getFormattedNameWithAttributes() << " ne peut pas rejoindre!" << endl;
         }
     }
 
@@ -74,7 +83,6 @@ public:
         if (defender.defense > attacker.attack)
             defenderWins++;
 
-        // Déterminer le gagnant
         Champion *winner = nullptr;
         Champion *loser = nullptr;
 
@@ -89,12 +97,11 @@ public:
             loser = &attacker;
         }
 
-        // Gérer le cas de la chance
         if (loser && loser->luck > winner->luck)
         {
             if (rand() % 2 == 0)
             { // 50% chance
-                cout << loser->name << " a de la chance et survit avec " << loser->lives << " vies!" << endl;
+                cout << loser->getFormattedNameWithAttributes() << " a de la chance et survit avec " << loser->lives << " vies!" << endl;
                 return;
             }
         }
@@ -102,17 +109,17 @@ public:
         if (winner)
         {
             loser->lives--;
-            cout << winner->name << " gagne le combat contre " << loser->name << ". ";
-            cout << loser->name << " a maintenant " << loser->lives << " vies." << endl;
+            cout << winner->getFormattedNameWithAttributes() << " gagne le combat contre " << loser->getFormattedNameWithAttributes() << ". ";
+            cout << loser->getFormattedNameWithAttributes() << " a maintenant " << loser->lives << " vies." << endl;
             if (loser->lives <= 0)
             {
-                cout << loser->name << " est éliminé de l'arène!" << endl;
+                cout << loser->getFormattedNameWithAttributes() << " est elimine de l'arene!" << endl;
                 champions.erase(champions.begin() + (loser - &champions[0])); // Remove the champion who lost all lives
             }
         }
         else
         {
-            cout << "Le combat entre " << attacker.name << " et " << defender.name << " se termine par un match nul." << endl;
+            cout << "Le combat entre " << attacker.getFormattedNameWithAttributes() << " et " << defender.getFormattedNameWithAttributes() << " se termine par un match nul." << endl;
         }
     }
 };
