@@ -144,7 +144,7 @@ public:
 
         for (const auto &champion : champions)
         {
-            if (champion.hasReachedScoreLimit(100))
+            if (champion->hasReachedScoreLimit(100))
             {
                 return true;
             }
@@ -173,8 +173,8 @@ int main()
 
             if (elapsed - lastChampionAddedAtSecond >= 5 && arena.champions.size() < 4)
             {
-                Champion newChampion("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
-                arena.addChampion(newChampion);
+                auto newChampion = make_unique<Champion>("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
+                arena.addChampion(move(newChampion));
                 lastChampionAddedAtSecond = static_cast<int>(elapsed);
                 i++;
             }
@@ -185,10 +185,10 @@ int main()
 
         cout << "Les combats sont finis!" << endl;
 
-        auto winner = *max_element(arena.champions.begin(), arena.champions.end(), [](const Champion &a, const Champion &b)
-                                   { return a.score < b.score; });
+        auto winner = max_element(arena.champions.begin(), arena.champions.end(), [](const unique_ptr<Champion> &a, const unique_ptr<Champion> &b)
+                                  { return a->score < b->score; });
 
-        cout << "The gagnant est : " << winner.getFormattedNameWithAttributes() << endl;
+        cout << "Le gagnant est : " << (*winner)->getFormattedNameWithAttributes() << endl;
 
         return 0;
     }
