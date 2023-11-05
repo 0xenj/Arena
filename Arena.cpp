@@ -50,10 +50,15 @@ class Arena
 {
 public:
     vector<unique_ptr<Champion>> champions;
+    const int ARENA_SIZE = 4;
+    const int BATTLE_SIZE = 2;
+    const int POINTS_WIN = 5;
+    const int POINTS_DRAW = 2;
+    const int POINTS_SURVIVE = 2;
 
     void addChampion(unique_ptr<Champion> c)
     {
-        if (champions.size() < 4)
+        if (champions.size() < ARENA_SIZE)
         {
             cout << c->getFormattedNameWithAttributes() << " a rejoint l'arene!" << endl;
             champions.push_back(move(c));
@@ -66,7 +71,7 @@ public:
 
     bool battle()
     {
-        if (champions.size() < 2)
+        if (champions.size() < BATTLE_SIZE)
         {
             cout << "Pas assez de champions pour un combat!" << endl;
             return false;
@@ -115,21 +120,21 @@ public:
         if (loser && loser->luck > winner->luck && rand() % 2 == 0)
         {
             cout << loser->getFormattedNameWithAttributes() << " a de la chance et survit avec " << loser->lives << " vies!" << endl;
-            loser->addScore(2);
+            loser->addScore(POINTS_SURVIVE);
             return false;
         }
 
         if (winner)
         {
             loser->lives--;
-            winner->addScore(5);
+            winner->addScore(POINTS_WIN);
             cout << winner->getFormattedNameWithAttributes() << " gagne le combat contre " << loser->getFormattedNameWithAttributes() << ". ";
             cout << loser->getFormattedNameWithAttributes() << " a maintenant " << loser->lives << " vies." << endl;
 
             if (loser->isEliminated())
             {
                 cout << loser->getFormattedNameWithAttributes() << " est elimine de l'arene!" << endl;
-                winner->addScore(5);
+                winner->addScore(POINTS_WIN);
                 champions.erase(remove_if(champions.begin(), champions.end(),
                                           [loser](const unique_ptr<Champion> &c)
                                           { return c.get() == loser; }),
@@ -139,8 +144,8 @@ public:
         else
         {
             cout << "Le combat entre " << attacker->getFormattedNameWithAttributes() << " et " << defender->getFormattedNameWithAttributes() << " se termine par un match nul." << endl;
-            attacker->addScore(2);
-            defender->addScore(2);
+            attacker->addScore(POINTS_DRAW);
+            defender->addScore(POINTS_DRAW);
         }
 
         for (const auto &champion : champions)
