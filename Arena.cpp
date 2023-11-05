@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <random>
 #include <ctime>
 #include <chrono>
 #include <thread>
@@ -154,13 +155,19 @@ public:
     }
 };
 
+int randomNumber(int max)
+{
+    random_device rd;
+    mt19937 rng(rd());
+    uniform_int_distribution<int> uni(0, max);
+    int random_number = uni(rng);
+    return random_number;
+}
+
 int main()
 {
     {
-        srand(static_cast<unsigned int>(time(nullptr)));
-
         Arena arena;
-        int N = 20;
         int i = 0;
         bool combatOver = false;
         auto start = chrono::steady_clock::now();
@@ -173,7 +180,7 @@ int main()
 
             if (elapsed - lastChampionAddedAtSecond >= 5 && arena.champions.size() < 4)
             {
-                auto newChampion = make_unique<Champion>("villain" + to_string(i), rand() % N, rand() % N, rand() % N, rand() % N);
+                auto newChampion = make_unique<Champion>("villain" + to_string(i), randomNumber(20), randomNumber(20), randomNumber(20), randomNumber(20));
                 arena.addChampion(move(newChampion));
                 lastChampionAddedAtSecond = static_cast<int>(elapsed);
                 i++;
