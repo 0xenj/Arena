@@ -17,6 +17,8 @@ public:
     string name;
     int attack, defense, magic, luck, lives, score;
 
+    /*Constructor of Champion's class
+    declare all stats of champion in it*/
     Champion(const string &n, int a, int d, int m, int l)
         : name(n), attack(a), defense(d), magic(m), luck(l), lives(3), score(0) {}
 
@@ -30,16 +32,19 @@ public:
                "](points: " + to_string(score) + ")";
     }
 
+    /*Points wins by a champion*/
     void addScore(int points)
     {
         score += points;
     }
 
+    /*Verify if the champion is eliminated or not*/
     bool isEliminated() const
     {
         return lives <= 0;
     }
 
+    /*Verify if a champion has reached the score limit and wins the game*/
     bool hasReachedScoreLimit(int limit) const
     {
         return score >= limit;
