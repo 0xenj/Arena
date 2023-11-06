@@ -9,8 +9,6 @@
 #include <algorithm>
 #include <memory>
 #include "Arena.hpp"
-#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>
 
 using namespace std;
 
